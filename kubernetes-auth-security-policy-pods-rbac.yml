@@ -1,0 +1,41 @@
+----
+# Авторизация политик безопасности для подов через RBAC
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1 
+metadata:
+  name: <role name>
+rules:
+- apiGroups: ['policy']
+  resources: ['podsecuritypolicies'] verbs: ['use']
+  resourceNames:
+  - <list of policies to authorize>
+----
+# Теперь привяжем роль кластера к авторизованным пользователям:
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1 
+metadata:
+  name: <binding name>
+roleRef:
+  kind: ClusterRole
+  name: <role name>
+  apiGroup: rbac.authorization.k8s.io
+subjects:
+# Авторизуем определенные служебные учетные записи: 
+- kind: ServiceAccount
+  name: <authorized service account name>
+  namespace: <authorized pod namespace>
+
+# Авторизуем определенных пользователей (не рекомендуется): 
+- kind: User
+  apiGroup: rbac.authorization.k8s.io 
+  name: <authorized user name>
+
+# Авторизуем все служебные учетные записи в пространстве имен: 
+- kind: Group
+  apiGroup: rbac.authorization.k8s.io
+  name: system:serviceaccounts
+
+# Или авторизуем всех аутентифицированных пользователей (что то же самое): 
+- kind: Group
+  apiGroup: rbac.authorization.k8s.io 
+  name: system:authenticated
